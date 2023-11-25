@@ -13,8 +13,9 @@ void getInitialGuesses(float y, float a1, float a2, float (*fpr)(float, float));
 int main()
 {
     int choice;
-    float y, a1, a2, eps;
+    float x, y, a1, a2, eps;
     float res;
+    float (*funcs[])(float x, float y) = {func1, func2};
     while (1)
     {
         printf("Choose equation: \n\t1:  cos(y/x)-2sin(1/x)+1/x = 0 \n\t2:  sin(lnx)-cos(lnx)+y*lnx = 0\n");
@@ -29,11 +30,16 @@ int main()
         }
     }
     y = getInput("Enter y: ");
-    getInitialGuesses(y, a1, a2, choice == 1 ? func1 : func2);
+
+    do
+    {
+        a1 = getInput("Enter a1: ");
+        a2 = getInput("Enter a2: ");
+    } while ((funcs[choice - 1](a1, y) * funcs[choice - 1](a2, y)) >= 0);
 
     eps = getInput("Enter accuracy: ");
 
-    res = choice == 1 ? findRoot(func1, a1, a2, eps, y) : findRoot(func2, a1, a2, eps, y);
+    res = findRoot(funcs[choice - 1], a1, a2, eps, y);
 
     printf("\tx = %f\n", res);
 }
@@ -113,13 +119,4 @@ float func1(float x, float y)
 float func2(float x, float y)
 {
     return (sin(log(x)) - cos(log(x)) + y * log(x));
-}
-
-void getInitialGuesses(float y, float a1, float a2, float (*fpr)(float, float))
-{
-    do
-    {
-        a1 = getInput("Enter a1: ");
-        a2 = getInput("Enter a2: ");
-    } while (((*fpr)(a1, y) * (*fpr)(a2, y)) >= 0);
 }
