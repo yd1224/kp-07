@@ -6,16 +6,18 @@
 #include <stdbool.h>
 double getInput(const char *prompt);
 bool isScientificNotation(const char *input);
-float findRoot(float (*fpr)(float), float l, float h, float eps);
-float funcCos(float x);
-float funcSin(float x);
+float findRoot(float (*fpr)(float, float), float a1, float a2, float eps, float y);
+float func1(float x, float y);
+float func2(float x, float y);
+void getInitialGuesses(float y, float a1, float a2, float (*fpr)(float, float));
 int main()
 {
     int choice;
     float y, a1, a2, eps;
+    float res;
     while (1)
     {
-        printf("Choose equation: \n\t1:  cos(t/x)-2sin(1/x)+1/x = 0 \n\t2:  sin(lnx)-cos(lnx)+t*lnx = 0\n");
+        printf("Choose equation: \n\t1:  cos(y/x)-2sin(1/x)+1/x = 0 \n\t2:  sin(lnx)-cos(lnx)+y*lnx = 0\n");
         choice = getInput("Enter your answer(\"1\" or \"2\"): ");
         if ((choice != 1) && (choice != 2))
         {
@@ -25,13 +27,15 @@ int main()
         {
             break;
         }
-        y = getInput("Enter y: ");
-        a1 = getInput("Enter a1: ");
-        a2 = getInput("Enter a2: ");
-        eps = getInput("Enter accuracy: ");
     }
+    y = getInput("Enter y: ");
+    getInitialGuesses(y, a1, a2, choice == 1 ? func1 : func2);
 
-    findRoot(float (*fpr)(float), a1, a2, eps);
+    eps = getInput("Enter accuracy: ");
+
+    res = choice == 1 ? findRoot(func1, a1, a2, eps, y) : findRoot(func2, a1, a2, eps, y);
+
+    printf("\tx = %f\n", res);
 }
 double getInput(const char *prompt)
 {
@@ -90,21 +94,32 @@ bool isScientificNotation(const char *input)
 
     return (eCount == 1) && (digitsBeforeE > 0) && (digitsAfterE > 0);
 }
-float findRoot(float (*fpr)(float), float l, float h, float eps)
+float findRoot(float (*fpr)(float, float), float a1, float a2, float eps, float y)
 {
     float x;
-    while (fabs(h - l) > eps)
+    while (fabs(a1 - a2) > eps)
     {
-        x = (l + h) / 2.0;
-        ((*fpr)(l) * (*fpr)(x) > 0) ? (l = x) : (h = x);
+        x = (a1 + a2) / 2.0;
+        ((*fpr)(a1, y) * (*fpr)(x, y) > 0) ? (a1 = x) : (a2 = x);
     }
+
     return x;
 }
-float funcCos(float x)
+
+float func1(float x, float y)
 {
-    return (cos(2.0 / x) - 2 * sin(1.0 / x) + 1.0 / x);
+    return (cos(y / x) - 2 * sin(1.0 / x) + 1.0 / x);
 }
-float funcSin(float x)
+float func2(float x, float y)
 {
-    return (sin(log(x)) - cos(log(x)) + 2 * log(x));
+    return (sin(log(x)) - cos(log(x)) + y * log(x));
+}
+
+void getInitialGuesses(float y, float a1, float a2, float (*fpr)(float, float))
+{
+    do
+    {
+        a1 = getInput("Enter a1: ");
+        a2 = getInput("Enter a2: ");
+    } while (((*fpr)(a1, y) * (*fpr)(a2, y)) >= 0);
 }
