@@ -177,7 +177,7 @@ float findNewtonRoot(float (*fpr)(float, float), float a, float b, float eps, fl
         if (derivative == 0)
         {
             printf("*********************\n");
-            printf("Mathematical Error");
+            printf(" Mathematical Error \n");
             printf("*********************\n");
             return -1;
         }
